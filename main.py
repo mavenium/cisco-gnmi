@@ -6,7 +6,7 @@ def test():
     builder.set_os('IOS XR')
     builder.set_secure_from_file(
         root_certificates='rootCA.pem',
-        private_key='rootCA.key',
+        private_key='client.key',
         certificate_chain='client.crt',
     )
     builder.set_call_authentication('root', 'qbic@A9kDev2020')

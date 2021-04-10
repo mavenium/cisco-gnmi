@@ -1,14 +1,18 @@
 from cisco_gnmi import ClientBuilder
 import re
 import json
+from os import environ
+from dotenv import load_dotenv, find_dotenv
 
 
 def test():
-    builder = ClientBuilder('37.156.144.182:57777')
+    load_dotenv(find_dotenv())
+
+    builder = ClientBuilder('{0}:{1}'.format(environ.get("ROUTER_IP"), environ.get("ROUTER_PORT")))
     builder.set_os('IOS XR')
     builder.set_secure_from_target()
     builder.set_ssl_target_override()
-    builder.set_call_authentication('root', 'qbic@A9kDev2020')
+    builder.set_call_authentication(environ.get("ROUTER_USER"), environ.get("ROUTER_PASSWORD"))
     client = builder.construct()
 
     result = client.get_xpaths('/interfaces/interface', data_type="ALL", encoding="JSON_IETF")
@@ -21,17 +25,18 @@ def test():
                     del interface['config']['enabled']
 
             if 'state' in interface:
-                del interface['state']['ifindex']
-                del interface['state']['admin-status']
-                del interface['state']['oper-status']
-                del interface['state']['last-change']
-                del interface['state']['logical']
-                del interface['state']['loopback-mode']
-                del interface['state']['type']
-                del interface['state']['enabled']
+                del interface['state']
+                # del interface['state']['ifindex']
+                # del interface['state']['admin-status']
+                # del interface['state']['oper-status']
+                # del interface['state']['last-change']
+                # del interface['state']['logical']
+                # del interface['state']['loopback-mode']
+                # del interface['state']['type']
+                # del interface['state']['enabled']
 
-                if 'counters' in interface['state']:
-                    del interface['state']['counters']
+                # if 'counters' in interface['state']:
+                #     del interface['state']['counters']
 
             if 'subinterfaces' in interface:
                 for subinterface in interface['subinterfaces']['subinterface']:
@@ -43,8 +48,8 @@ def test():
                     if 'state' in subinterface:
                         del subinterface['state']
 
-                    if 'index' in subinterface:
-                        del subinterface['index']
+                    # if 'index' in subinterface:
+                    #     del subinterface['index']
 
                     if 'openconfig-if-ip:ipv4' in subinterface:
                         if 'state' in subinterface['openconfig-if-ip:ipv4']:
@@ -91,12 +96,12 @@ def test():
 
     print(openconfig_interfaces)
 
-    try:
-        # config = '{"openconfig-interfaces:interfaces": {"interface": [{"name": "Loopback70", "config": {"name": "Loopback70"}, "subinterfaces": {"subinterface": [{"index": 0, "openconfig-if-ip:ipv4": {"addresses": {"address": [{"ip": "192.0.2.255", "config": {"ip": "192.0.2.255", "prefix-length": 32}}]}}, "openconfig-if-ip:ipv6": {"addresses": {"address": [{"ip": "2001:db8::100", "config": {"ip": "2001:db8::100", "prefix-length": 128}}]}}}]}}]}}'
-        set_response = client.set_json(replace_json_configs=openconfig_interfaces)
-        print(set_response)
-    except Exception as e:
-        print(e)
+    # try:
+    #     # config = '{"openconfig-interfaces:interfaces": {"interface": [{"name": "Loopback70", "config": {"name": "Loopback70"}, "subinterfaces": {"subinterface": [{"index": 0, "openconfig-if-ip:ipv4": {"addresses": {"address": [{"ip": "192.0.2.255", "config": {"ip": "192.0.2.255", "prefix-length": 32}}]}}, "openconfig-if-ip:ipv6": {"addresses": {"address": [{"ip": "2001:db8::100", "config": {"ip": "2001:db8::100", "prefix-length": 128}}]}}}]}}]}}'
+    #     set_response = client.set_json(replace_json_configs=openconfig_interfaces)
+    #     print(set_response)
+    # except Exception as e:
+    #     print(e)
 
     # bgps = client.get_xpaths('/bgp-cfg/bgp', data_type="ALL", encoding="JSON_IETF")
     # print(bgps)
